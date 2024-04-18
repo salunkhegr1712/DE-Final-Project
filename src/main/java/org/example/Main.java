@@ -42,11 +42,11 @@ public class Main {
 
 //        resultDF.show();
         // Write the result to a CSV file
-        resultDF.repartition(1).write().csv("outputs/final-project-output.csv");
 
 
         // Displaying the first few rows of the result
         resultDF.show();
+        resultDF.repartition(1).write().option("header","true").csv("outputs/final-project-output.csv");
     }
     private static Dataset<Row> readCryptoDataset(SparkSession spark,String filePath){
         return spark.read().option("header", "true")
@@ -78,6 +78,7 @@ public class Main {
         appleMovingAvgDF = appleMovingAvgDF
                 .withColumnRenamed("high", "apple_high")
                 .withColumnRenamed("low", "apple_low")
+
                 .drop("year");
 
         bitcoinMovingAvgDF = bitcoinMovingAvgDF
@@ -95,6 +96,9 @@ public class Main {
                 .join(ethereumMovingAvgDF, "date")
                 .select("date", "year", "apple_high", "apple_20day_avg", "apple_low",
                         "bitcoin_high", "bitcoin_20day_avg", "bitcoin_low",
-                        "ethereum_high", "ethereum_20day_avg", "ethereum_low");
+                        "ethereum_high", "ethereum_20day_avg", "ethereum_low")
+                .filter(col("year").geq("2018")).sort("date")
+                ;
     }
+
 }
